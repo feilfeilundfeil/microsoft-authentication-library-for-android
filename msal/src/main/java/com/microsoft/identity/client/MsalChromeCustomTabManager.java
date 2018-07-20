@@ -23,6 +23,7 @@
 
 package com.microsoft.identity.client;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -78,7 +79,7 @@ public class MsalChromeCustomTabManager {
      */
     public void bindCustomTabsService() {
         if (mChromePackageWithCustomTabSupport != null) {
-
+            Logger.verbose(TAG, null, "Heidi: bindCustomTabsService start.");
             final CountDownLatch latch = new CountDownLatch(1);
             mCustomTabsServiceConnection = new MsalCustomTabsServiceConnection(latch);
 
@@ -93,6 +94,7 @@ public class MsalChromeCustomTabManager {
             // Create the Intent used to launch the Url
             mCustomTabsIntent = builder.setShowTitle(true).build();
             mCustomTabsIntent.intent.setPackage(mChromePackageWithCustomTabSupport);
+            Logger.verbose(TAG, null, "Heidi: bindCustomTabsService finished.");
         }
     }
 
@@ -100,6 +102,7 @@ public class MsalChromeCustomTabManager {
      * Helper method to wait for MsalCustomTabsServiceConnection to establish.
      */
     private boolean waitForServiceConnectionToEstablish(CountDownLatch latch) {
+        Logger.verbose(TAG, null, "Heidi: waitForServiceConnectionToEstablish start.");
         boolean connectionEstablished = true;
         try {
             // await returns true if count is 0, false if action times out
@@ -110,12 +113,13 @@ public class MsalChromeCustomTabManager {
                 // to be safe, we'll skip warmup and rely on mCustomTabsServiceIsBound
                 // to unbind the Service when onStop() is called.
                 connectionEstablished = false;
-                Logger.warning(TAG, null, "Connection to CustomTabs timed out. Skipping warmup.");
+                Logger.warning(TAG, null, "Heidi: Connection to CustomTabs timed out. Skipping warmup.");
             }
         } catch (InterruptedException e) {
-            Logger.error(TAG, null, "Failed to connect to CustomTabs. Skipping warmup.", e);
+            Logger.error(TAG, null, "Heidi: Failed to connect to CustomTabs. Skipping warmup.", e);
             connectionEstablished = false;
         }
+        Logger.verbose(TAG, null, "Heidi: waitForServiceConnectionToEstablish finished.");
         return connectionEstablished;
     }
 
@@ -124,7 +128,9 @@ public class MsalChromeCustomTabManager {
      */
     public void unbindCustomTabsService() {
         if (null != mCustomTabsServiceConnection && mCustomTabsServiceConnection.getCustomTabsServiceIsBound()) {
+            Logger.verbose(TAG, null, "Heidi: unbindCustomTabsService start.");
             mParentActivity.unbindService(mCustomTabsServiceConnection);
+            Logger.verbose(TAG, null, "Heidi: unbindCustomTabsService finished.");
         }
     }
 
@@ -166,6 +172,7 @@ public class MsalChromeCustomTabManager {
 
         @Override
         public void onCustomTabsServiceConnected(ComponentName name, CustomTabsClient client) {
+            Logger.verbose(TAG, null, "Heidi: onCustomTabsServiceConnected started.");
             final CountDownLatch latch = mLatchWeakReference.get();
 
             mCustomTabsServiceIsBound = true;
@@ -176,10 +183,12 @@ public class MsalChromeCustomTabManager {
             if (null != latch) {
                 latch.countDown();
             }
+            Logger.verbose(TAG, null, "Heidi: onCustomTabsServiceConnected finished.");
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
+            Logger.verbose(TAG, null, "Heidi: onServiceDisconnected called.");
             mCustomTabsServiceIsBound = false;
         }
 
