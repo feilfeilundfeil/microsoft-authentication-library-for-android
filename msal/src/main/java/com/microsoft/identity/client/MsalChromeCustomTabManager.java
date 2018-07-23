@@ -130,6 +130,7 @@ public class MsalChromeCustomTabManager {
         if (null != mCustomTabsServiceConnection && mCustomTabsServiceConnection.getCustomTabsServiceIsBound()) {
             Logger.verbose(TAG, null, "Heidi: unbindCustomTabsService start.");
             mParentActivity.unbindService(mCustomTabsServiceConnection);
+            mCustomTabsServiceConnection.unbindCustomTabsService();
             Logger.verbose(TAG, null, "Heidi: unbindCustomTabsService finished.");
         }
     }
@@ -186,9 +187,17 @@ public class MsalChromeCustomTabManager {
             Logger.verbose(TAG, null, "Heidi: onCustomTabsServiceConnected finished.");
         }
 
+        /*
+         * onServiceDisconnected() only gets called when the Service terminates unexpectedly.
+         */
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
+            unbindCustomTabsService();
+        }
+
+        protected void unbindCustomTabsService() {
             Logger.verbose(TAG, null, "Heidi: onServiceDisconnected called.");
+            mCustomTabsClient = null;
             mCustomTabsServiceIsBound = false;
         }
 
