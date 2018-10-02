@@ -31,6 +31,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.test.InstrumentationRegistry;
@@ -38,6 +39,7 @@ import android.support.test.runner.AndroidJUnit4;
 import android.test.AndroidTestCase;
 import android.util.Pair;
 
+import com.microsoft.identity.client.exception.MsalArgumentException;
 import com.microsoft.identity.client.exception.MsalClientException;
 import com.microsoft.identity.client.exception.MsalException;
 import com.microsoft.identity.client.exception.MsalServiceException;
@@ -45,6 +47,7 @@ import com.microsoft.identity.client.internal.MsalUtils;
 import com.microsoft.identity.client.internal.controllers.MSALApiDispatcher;
 import com.microsoft.identity.client.internal.controllers.RequestCodes;
 import com.microsoft.identity.common.internal.net.HttpUrlConnectionFactory;
+import com.microsoft.identity.msal.test.R;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -75,7 +78,6 @@ import static com.microsoft.identity.client.AndroidTestUtil.MOCK_UTID;
  * Tests for {@link PublicClientApplication}.
  */
 @RunWith(AndroidJUnit4.class)
-@Ignore
 public final class PublicClientApplicationTest extends AndroidTestCase {
     private Context mAppContext;
     private String mRedirectUri;
@@ -131,6 +133,12 @@ public final class PublicClientApplicationTest extends AndroidTestCase {
                         PackageManager.GET_META_DATA))).thenReturn(applicationInfo);
 
         new PublicClientApplication(context);
+    }
+
+    @Test(expected = Resources.NotFoundException.class)
+    public void testInvalidConfigurationFileResourceId(){
+        final Context context = new MockContext(mAppContext);
+        new PublicClientApplication(context, 0);
     }
 
     /**
@@ -243,54 +251,59 @@ public final class PublicClientApplicationTest extends AndroidTestCase {
 
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testAcquireTokenInteractiveScopeWithEmptyString() throws PackageManager.NameNotFoundException, IOException,
-            InterruptedException {
-        new GetTokenBaseTestCase() {
+    @Test
+    public void testEmptyScope(){
+        final Context context = new MockContext(mAppContext);
+        AndroidTestUtil.mockNetworkConnected(context, true);
+        PublicClientApplication pca = new PublicClientApplication(context, R.raw.test_pcaconfig_good);
+        String[] emptyScope = {"", null};
+        pca.acquireToken(this.getActivity(mAppContext), emptyScope, new AuthenticationCallback() {
             @Override
-            void mockHttpRequest() throws IOException {
-                final String idToken = AndroidTestUtil.getDefaultIdToken();
-                final HttpURLConnection mockedConnection = AndroidTestMockUtil.getMockedConnectionWithFailureResponse(
-                        HttpURLConnection.HTTP_OK, AndroidTestUtil.getSuccessResponse(idToken, AndroidTestUtil.ACCESS_TOKEN, AndroidTestUtil.REFRESH_TOKEN, ""));
-                Mockito.when(mockedConnection.getOutputStream()).thenReturn(Mockito.mock(OutputStream.class));
-                HttpUrlConnectionFactory.addMockedConnection(mockedConnection);
+            public void onSuccess(AuthenticationResult authenticationResult) {
+                fail("Unexpected success");
             }
 
             @Override
-            void makeAcquireTokenCall(final PublicClientApplication publicClientApplication,
-                                      final Activity activity,
-                                      final CountDownLatch releaseLock) {
-                publicClientApplication.acquireToken(activity, new String[]{" "}, new AuthenticationCallback() {
-                    @Override
-                    public void onSuccess(AuthenticationResult authenticationResult) {
-                        Assert.assertTrue(AndroidTestUtil.ACCESS_TOKEN.equals(authenticationResult.getAccessToken()));
-                        final IAccount account = authenticationResult.getAccount();
-                        Assert.assertTrue(account.getHomeAccountIdentifier().getIdentifier().equals(""));
-                        Assert.assertTrue(account.getUsername().equals(AndroidTestUtil.DISPLAYABLE));
-
-                        releaseLock.countDown();
-                    }
-
-                    @Override
-                    public void onError(MsalException exception) {
-                        fail("Unexpected Error");
-                    }
-
-                    @Override
-                    public void onCancel() {
-                        fail("Unexpected Cancel");
-                    }
-                });
+            public void onError(MsalException exception) {
+                Assert.assertTrue(exception instanceof MsalArgumentException);
+                MsalArgumentException argumentException = (MsalArgumentException)exception;
+                Assert.assertEquals(MsalArgumentException.SCOPE_ARGUMENT_NAME, argumentException.getArgumentName());
             }
 
             @Override
-            String getFinalAuthUrl() throws UnsupportedEncodingException {
-                return mRedirectUri + "?code=1234&state=" + AndroidTestUtil.encodeProtocolState(
-                        DEFAULT_AUTHORITY, new HashSet<>(Arrays.asList(SCOPE)));
+            public void onCancel() {
+                fail("Unexpected cancel");
             }
-        }.performTest();
+        });
     }
 
+    @Test
+    public void testNetworkNotAvailable(){
+        final Context context = new MockContext(mAppContext);
+        AndroidTestUtil.mockNetworkConnected(context, false);
+        PublicClientApplication pca = new PublicClientApplication(context, R.raw.test_pcaconfig_good);
+        String[] dummyScope = {"test.scope"};
+        pca.acquireToken(this.getActivity(mAppContext), dummyScope, new AuthenticationCallback() {
+            @Override
+            public void onSuccess(AuthenticationResult authenticationResult) {
+                fail("Unexpected success");
+            }
+
+            @Override
+            public void onError(MsalException exception) {
+                Assert.assertTrue(exception instanceof MsalClientException);
+                Assert.assertEquals(exception.getErrorCode(), MsalClientException.DEVICE_NETWORK_NOT_AVAILABLE);
+            }
+
+            @Override
+            public void onCancel() {
+                fail("Unexpected cancel");
+            }
+        });
+    }
+
+
+    @Ignore
     @Test
     public void testClientInfoNotReturned() throws PackageManager.NameNotFoundException, IOException,
             InterruptedException {
@@ -299,6 +312,7 @@ public final class PublicClientApplicationTest extends AndroidTestCase {
             @Override
             void mockHttpRequest() throws IOException {
                 final String idToken = AndroidTestUtil.getDefaultIdToken();
+
                 final HttpURLConnection mockedConnection = AndroidTestMockUtil.getMockedConnectionWithFailureResponse(
                         HttpURLConnection.HTTP_OK, AndroidTestUtil.getSuccessResponse(idToken, AndroidTestUtil.ACCESS_TOKEN, AndroidTestUtil.REFRESH_TOKEN, "eyJ1aWQiOiI1MGE0YjhhMS0zMzNiLTQwNDEtOGQzNS0wYTg2MDY2YzE1YTgiLCJ1dGlkIjoiMGE4NGU5NTctODg0Yi00NmQxLTk0OGYtYTUwMWIwZWE2NmYyIn0="));
                 Mockito.when(mockedConnection.getOutputStream()).thenReturn(Mockito.mock(OutputStream.class));
@@ -477,109 +491,6 @@ public final class PublicClientApplicationTest extends AndroidTestCase {
                 }), Mockito.eq(RequestCodes.LOCAL_AUTHORIZATION_REQUEST));
             }
         }.performTest();
-    }
-
-    @Test
-    public void testB2cAuthorityNotInTrustedList() throws PackageManager.NameNotFoundException, IOException, InterruptedException {
-        final String unsupportedB2cAuthority = "https://somehost/tfp/sometenant/somepolicy";
-
-        new GetTokenBaseTestCase() {
-            @Override
-            protected String getAlternateAuthorityInManifest() {
-                return unsupportedB2cAuthority;
-            }
-
-            @Override
-            void mockHttpRequest() throws IOException {
-                // do nothing. The intention for this test is the callback receives cancel if returned url contains
-                // cancel error.
-            }
-
-            @Override
-            void makeAcquireTokenCall(final PublicClientApplication publicClientApplication,
-                                      final Activity activity,
-                                      final CountDownLatch releaseLock) {
-                publicClientApplication.acquireToken(activity, SCOPE, "somehint", UiBehavior.FORCE_LOGIN,
-                        new ArrayList<Pair<String, String>>() {{
-                            add(new Pair<>("extra", "param"));
-                        }},
-                        null, null, new AuthenticationCallback() {
-                            @Override
-                            public void onSuccess(AuthenticationResult authenticationResult) {
-                                fail("unexpected success result");
-                            }
-
-                            @Override
-                            public void onError(MsalException exception) {
-                                try {
-                                    assertTrue(exception instanceof MsalClientException);
-                                    assertTrue(exception.getErrorCode().equals(MsalClientException.AUTHORITY_VALIDATION_NOT_SUPPORTED));
-                                } finally {
-                                    releaseLock.countDown();
-                                }
-                            }
-
-                            @Override
-                            public void onCancel() {
-                                fail("unexpected cancel");
-                            }
-                        });
-            }
-
-            @Override
-            String getFinalAuthUrl() throws UnsupportedEncodingException {
-                return "";
-            }
-        }.performTest();
-    }
-
-    @Test
-    @Ignore
-    public void testAcquireTokenWithUserFailed() throws PackageManager.NameNotFoundException, InterruptedException, IOException {
-        /*
-        new GetTokenBaseTestCase() {
-            private User mUser = new User(AndroidTestUtil.PREFERRED_USERNAME, AndroidTestUtil.NAME, AndroidTestUtil.ISSUER, AndroidTestUtil.UID, AndroidTestUtil.UTID);
-
-            @Override
-            void mockHttpRequest() throws IOException {
-                final HttpURLConnection mockedConnection = AndroidTestMockUtil.getMockedConnectionWithFailureResponse(
-                        HttpURLConnection.HTTP_BAD_REQUEST, AndroidTestUtil.getErrorResponseMessage("invalid_request"));
-                Mockito.when(mockedConnection.getOutputStream()).thenReturn(Mockito.mock(OutputStream.class));
-                HttpUrlConnectionFactory.addMockedConnection(mockedConnection);
-            }
-
-            @Override
-            void makeAcquireTokenCall(final PublicClientApplication publicClientApplication,
-                                      final Activity activity,
-                                      final CountDownLatch releaseLock) {
-                publicClientApplication.acquireToken(activity, SCOPE, mUser, UiBehavior.SELECT_ACCOUNT, null, null, null, new AuthenticationCallback() {
-                    @Override
-                    public void onSuccess(AuthenticationResult authenticationResult) {
-                        fail();
-                    }
-
-                    @Override
-                    public void onError(MsalException exception) {
-                        assertTrue(exception instanceof MsalServiceException);
-                        assertTrue(exception.getErrorCode().equals(MsalServiceException.INVALID_REQUEST));
-                        releaseLock.countDown();
-                    }
-
-                    @Override
-                    public void onCancel() {
-                        fail("Unexpected Cancel");
-                    }
-                });
-            }
-
-            @Override
-            String getFinalAuthUrl() throws UnsupportedEncodingException {
-                return mRedirectUri + "?code=1234&state=" + AndroidTestUtil.encodeProtocolState(
-                        DEFAULT_AUTHORITY, new HashSet<>(Arrays.asList(SCOPE)));
-            }
-        }.performTest();
-
-        */
     }
 
     static String getIdToken(final String displayable, final String uniqueId, final String homeOid) {
