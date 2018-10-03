@@ -132,7 +132,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         if (mApplication == null) {
-            mApplication = new PublicClientApplication(this.getApplicationContext(), R.raw.msal_config);
+            //mApplication = new PublicClientApplication(this.getApplicationContext(), R.raw.msal_config);
+            mApplication = new PublicClientApplication(this.getApplicationContext(), R.raw.b2c_config);
         }
 
     }
@@ -257,7 +258,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case AAD_COMMON:
                 return Constants.AAD_AUTHORITY;
             case B2C:
-                return "B2c is not configured yet";
+                return "https://login.microsoftonline.com/tfp/iosmsalb2c.onmicrosoft.com/B2C_1_Signin";
             case AAD_MSDEVEX:
                 return Constants.AAD_MSDEVEX;
             case AAD_GUEST:
@@ -278,11 +279,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                   final String[] extraScope) {
         // The sample app is having the PII enable setting on the MainActivity. Ideally, app should decide to enable Pii or not,
         // if it's enabled, it should be  the setting when the application is onCreate.
-        if (mEnablePiiLogging) {
-            Logger.getInstance().setEnablePII(true);
-        } else {
-            Logger.getInstance().setEnablePII(false);
-        }
+//        if (mEnablePiiLogging) {
+//            Logger.getInstance().setEnablePII(true);
+//        } else {
+//            Logger.getInstance().setEnablePII(false);
+//        }
+        Logger.getInstance().setEnableLogcatLog(true);
+        Logger.getInstance().setEnablePII(true);
 
         try {
             mApplication.acquireToken(

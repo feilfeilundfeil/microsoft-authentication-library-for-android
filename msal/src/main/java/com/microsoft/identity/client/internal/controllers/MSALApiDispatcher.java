@@ -30,6 +30,7 @@ import com.microsoft.identity.client.exception.MsalException;
 import com.microsoft.identity.client.exception.MsalUserCancelException;
 import com.microsoft.identity.common.adal.internal.AuthenticationConstants;
 import com.microsoft.identity.common.internal.logging.DiagnosticContext;
+import com.microsoft.identity.common.internal.logging.Logger;
 
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -58,8 +59,10 @@ public class MSALApiDispatcher {
                     } catch (Exception e) {
                         //Capture any resulting exception and map to MsalException type
                         if (e instanceof MsalException) {
+                            Logger.errorPII("Heidi", ((MsalException) e).getErrorCode(), e.getMessage(), e);
                             msalException = (MsalException) e;
                         } else {
+                            Logger.errorPII("Heidi", null, e.getMessage(), e);
                             msalException = ExceptionAdapter.msalExceptionFromException(e);
                         }
                     }

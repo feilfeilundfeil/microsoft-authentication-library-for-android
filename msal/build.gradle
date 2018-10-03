@@ -124,12 +124,11 @@ dependencies {
     localApi(project(":common")) {
         transitive = false
     }
-
-    snapshotApi(group: 'com.microsoft.identity', name: 'common', version: '0.0.3-SNAPSHOT', changing: true)
-
-    distApi("com.microsoft.identity:common:0.0.5-RC3") {
-        transitive = false
-    }
+//    snapshotApi(group: 'com.microsoft.identity', name: 'common', version: '0.0.3-SNAPSHOT', changing: true)
+//
+//    distApi("com.microsoft.identity:common:0.0.5-RC2") {
+//        transitive = false
+//    }
 }
 
 def configDir = new File(buildscript.sourceFile.parentFile.parentFile, 'config')
