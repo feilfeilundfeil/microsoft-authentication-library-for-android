@@ -85,7 +85,7 @@ public class AcquireTokenFragment extends Fragment {
         mEnablePII = view.findViewById(enablePII);
         mForceRefresh = view.findViewById(R.id.forceRefresh);
         mDefaultBrowser = view.findViewById(R.id.default_browser);
-        mSelectAccount = view.findViewById(R.id.select_user);
+        //mSelectAccount = view.findViewById(R.id.select_user);
         mGetUsers = view.findViewById(R.id.btn_getUsers);
         mClearCache = view.findViewById(R.id.btn_clearCache);
         mAcquireToken = view.findViewById(R.id.btn_acquiretoken);
@@ -105,26 +105,26 @@ public class AcquireTokenFragment extends Fragment {
         mAcquireTokenSilent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mSelectAccount.getSelectedItem()!=null){
-                    mLoginhint.setText(mSelectAccount.getSelectedItem().toString());
-                }
+//                if(mSelectAccount.getSelectedItem()!=null){
+//                    mLoginhint.setText(mSelectAccount.getSelectedItem().toString());
+//                }
                 mOnFragmentInteractionListener.onAcquireTokenSilentClicked(getCurrentRequestOptions());
             }
         });
 
-        mSelectAccount.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if(parent.getSelectedItem()!=null){
-                    mLoginhint.setText(parent.getSelectedItem().toString());
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
+//        mSelectAccount.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//                if(parent.getSelectedItem()!=null){
+//                    mLoginhint.setText(parent.getSelectedItem().toString());
+//                }
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> parent) {
+//
+//            }
+//        });
 
         mGetUsers.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -137,9 +137,9 @@ public class AcquireTokenFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 String accountToRemove = null;
-                if(mSelectAccount.getSelectedItem()!=null){
-                    accountToRemove = mSelectAccount.getSelectedItem().toString();
-                }
+//                if(mSelectAccount.getSelectedItem()!=null){
+//                    accountToRemove = mSelectAccount.getSelectedItem().toString();
+//                }
 
                 mOnFragmentInteractionListener.onRemoveUserClicked(accountToRemove);
             }
@@ -162,12 +162,12 @@ public class AcquireTokenFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if(mOnFragmentInteractionListener!=null){
-            mOnFragmentInteractionListener.bindSelectAccountSpinner(mSelectAccount);
-        }
-        if(mSelectAccount.getSelectedItem()!=null){
-            mLoginhint.setText(mSelectAccount.getSelectedItem().toString());
-        }
+//        if(mOnFragmentInteractionListener!=null){
+//            mOnFragmentInteractionListener.bindSelectAccountSpinner(mSelectAccount);
+//        }
+//        if(mSelectAccount.getSelectedItem()!=null){
+//            mLoginhint.setText(mSelectAccount.getSelectedItem().toString());
+//        }
         setCurrentDefaultBrowserValue();
     }
 

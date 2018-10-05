@@ -56,6 +56,7 @@ import com.microsoft.identity.client.exception.MsalClientException;
 import com.microsoft.identity.client.exception.MsalException;
 import com.microsoft.identity.client.exception.MsalServiceException;
 import com.microsoft.identity.client.exception.MsalUiRequiredException;
+import com.microsoft.identity.client.internal.authorities.Authority;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -115,6 +116,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Logger.getInstance().setEnableLogcatLog(true);
+        Logger.getInstance().setEnablePII(true);
         setContentView(R.layout.activity_main);
 
         mContentMain = findViewById(R.id.content_main);
@@ -136,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         if (mApplication == null) {
-            mApplication = new PublicClientApplication(this.getApplicationContext(), R.raw.msal_config);
+            mApplication = new PublicClientApplication(this.getApplicationContext(), R.raw.b2c_config);
         }
 
     }
@@ -226,6 +229,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         for (final IAccount account : mApplication.getAccounts()) {
             if (account.getUsername().equals(loginHint.trim().toLowerCase())) {
                 return account;
+            } else if (account.getAccountIdentifier().getIdentifier().equals(loginHint.trim().toLowerCase())){
+                return account;
             }
         }
 
@@ -271,11 +276,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mScopes = scopes.toLowerCase().split(" ");
         mExtraScopesToConsent = requestOptions.getExtraScopesToConsent() == null ? null : requestOptions.getExtraScopesToConsent().toLowerCase().split(" ");
 
-        if(userAgent.name().equalsIgnoreCase("BROWSER")){
+        if (userAgent.name().equalsIgnoreCase("BROWSER")) {
             mApplication = new PublicClientApplication(this.getApplicationContext(), R.raw.msal_config_browser);
-        }else if(userAgent.name().equalsIgnoreCase("WEBVIEW")){
+        } else if (userAgent.name().equalsIgnoreCase("WEBVIEW")) {
             mApplication = new PublicClientApplication(this.getApplicationContext(), R.raw.msal_config_webview);
-        }else {
+        } else if (requestOptions.getAuthorityType().equals(Constants.AuthorityType.B2C)) {
+            mApplication = new PublicClientApplication(this.getApplicationContext(), R.raw.b2c_config);
+        } else {
             mApplication = new PublicClientApplication(this.getApplicationContext(), R.raw.msal_config);
         }
     }
@@ -285,7 +292,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case AAD_COMMON:
                 return Constants.AAD_AUTHORITY;
             case B2C:
-                return "B2c is not configured yet";
+                return "https://login.microsoftonline.com/tfp/iosmsalb2c.onmicrosoft.com/B2C_1_Signin";
             case AAD_MSDEVEX:
                 return Constants.AAD_MSDEVEX;
             case AAD_GUEST:
