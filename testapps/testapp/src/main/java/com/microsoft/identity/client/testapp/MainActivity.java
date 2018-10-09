@@ -224,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     IAccount getAccount(final String loginHint) {
         for (final IAccount account : mApplication.getAccounts()) {
-            if (account.getUsername().equals(loginHint.trim().toLowerCase())) {
+            if (account.getUsername().equalsIgnoreCase(loginHint)) {
                 return account;
             }
         }
@@ -276,7 +276,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }else if(userAgent.name().equalsIgnoreCase("WEBVIEW")){
             mApplication = new PublicClientApplication(this.getApplicationContext(), R.raw.msal_config_webview);
         }else {
-            mApplication = new PublicClientApplication(this.getApplicationContext(), R.raw.msal_config);
+            if(requestOptions.getAuthorityType() == Constants.AuthorityType.B2C){
+                mApplication = new PublicClientApplication(this.getApplicationContext(), R.raw.b2c_config);
+            }else {
+                mApplication = new PublicClientApplication(this.getApplicationContext(), R.raw.msal_config);
+            }
         }
     }
 
