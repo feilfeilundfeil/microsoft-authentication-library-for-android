@@ -17,7 +17,7 @@ android {
         versionName getAppVersionName()
         project.archivesBaseName = "msal"
         project.version = android.defaultConfig.versionName
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -105,8 +105,8 @@ task sourcesJar(type: Jar) {
 }
 
 dependencies {
-    implementation "com.android.support:appcompat-v7:$rootProject.ext.supportLibraryVersion"
-    implementation "com.android.support:customtabs:$rootProject.ext.supportLibraryVersion"
+    implementation "androidx.appcompat:appcompat:$rootProject.ext.supportLibraryVersion"
+    implementation "androidx.browser:browser:1.0.0"
     implementation "com.google.code.gson:gson:$rootProject.ext.gsonVersion"
     implementation 'com.nimbusds:nimbus-jose-jwt:5.7'
 
@@ -116,20 +116,20 @@ dependencies {
     testImplementation "org.mockito:mockito-android:$rootProject.ext.mockitoAndroidVersion"
 
     // instrumentation test dependencies
-    androidTestImplementation "com.android.support.test:runner:$rootProject.ext.runnerVersion"
+    androidTestImplementation "androidx.test:runner:$rootProject.ext.runnerVersion"
     // Set this dependency to use JUnit 4 rules
-    androidTestImplementation "com.android.support.test:rules:$rootProject.ext.rulesVersion"
+    androidTestImplementation "androidx.test:rules:$rootProject.ext.rulesVersion"
     androidTestImplementation "org.mockito:mockito-android:$rootProject.ext.mockitoAndroidVersion"
     // 'local' flavor dependencies
-    localApi(project(":common")) {
+    api(project(":common")) {
         transitive = false
     }
 
-    snapshotApi(group: 'com.microsoft.identity', name: 'common', version: '0.0.8', changing: true)
+//    snapshotApi(group: 'com.microsoft.identity', name: 'common', version: '0.0.8', changing: true)
 
-    distApi("com.microsoft.identity:common:0.0.8") {
-        transitive = false
-    }
+//    distApi("com.microsoft.identity:common:0.0.8") {
+//        transitive = false
+//    }
 }
 
 def configDir = new File(buildscript.sourceFile.parentFile.parentFile, 'config')

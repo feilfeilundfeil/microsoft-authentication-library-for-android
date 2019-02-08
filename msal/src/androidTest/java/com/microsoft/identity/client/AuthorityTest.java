@@ -1,6 +1,6 @@
 package com.microsoft.identity.client;
 
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.microsoft.identity.common.internal.authorities.Authority;
 

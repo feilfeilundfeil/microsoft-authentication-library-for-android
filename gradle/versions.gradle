@@ -2,20 +2,20 @@
 ext {
     // SDK
     minSdkVersion = 16
-    targetSdkVersion = 27
-    compileSdkVersion = 27
+    targetSdkVersion = 28
+    compileSdkVersion = 28
     buildToolsVersion = "28.0.3"
 
     // Plugins
-    gradleVersion = '3.2.1'
+    gradleVersion = '3.3.1'
     androidMavenGradlePluginVersion = "1.4.1"
 
     // Libraries
-    supportLibraryVersion = "27.1.1"
+    supportLibraryVersion = '1.0.2'
     junitVersion = "4.12"
     mockitoCoreVersion = "2.18.3"
     mockitoAndroidVersion = "2.18.3"
-    runnerVersion = "0.5"
-    rulesVersion = "0.5"
+    runnerVersion = '1.1.0-alpha4'
+    rulesVersion = '1.1.0-alpha4'
     gsonVersion = "2.8.4"
 }

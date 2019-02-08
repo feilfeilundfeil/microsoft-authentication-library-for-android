@@ -25,7 +25,7 @@ package com.microsoft.identity.client.internal.controllers;
 import android.accounts.AccountManager;
 import android.accounts.AuthenticatorDescription;
 import android.content.Context;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.microsoft.identity.client.PublicClientApplicationConfiguration;
 import com.microsoft.identity.common.adal.internal.AuthenticationConstants;

@@ -36,8 +36,6 @@ public final class BrokerActivity extends Activity {
     static final String BROKER_INTENT_STARTED = "broker_intent_started";
     static final int BROKER_INTENT_REQUEST_CODE = 1001;
 
-    private static final String TAG = BrokerActivity.class.getSimpleName();
-
     private Intent mBrokerInteractiveRequestIntent;
     private Boolean mBrokerIntentStarted = false;
 
