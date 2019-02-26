@@ -23,7 +23,6 @@
 package com.microsoft.identity.client.internal.controllers;
 
 import android.content.Intent;
-import androidx.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.microsoft.identity.client.BrowserTabActivity;
@@ -75,6 +74,9 @@ public class LocalMSALController extends BaseController {
 
         //00) Validate MSAL Parameters
         parameters.validate();
+
+        // Add default scopes
+        addDefaultScopes(parameters);
 
         //0) Get known authority result
         throwIfNetworkNotAvailable(parameters.getAppContext());
@@ -169,21 +171,13 @@ public class LocalMSALController extends BaseController {
                 "Acquiring token silently..."
         );
 
-        final List<String> msalScopes = new ArrayList<>();
-        msalScopes.add("openid");
-        msalScopes.add("profile");
-        msalScopes.add("offline_access");
-
-        if (!parameters.getScopes().containsAll(msalScopes)) {
-            parameters.getScopes().addAll(msalScopes);
-            // Sanitize-out any null or empty scopes
-            parameters.getScopes().removeAll(Arrays.asList("", null));
-        }
-
         final AcquireTokenResult acquireTokenSilentResult = new AcquireTokenResult();
 
         //Validate MSAL Parameters
         parameters.validate();
+
+        // Add default scopes
+        addDefaultScopes(parameters);
 
         final OAuth2TokenCache tokenCache = parameters.getTokenCache();
 
