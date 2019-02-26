@@ -23,7 +23,6 @@
 package com.microsoft.identity.client.internal.controllers;
 
 import android.content.Intent;
-import androidx.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.microsoft.identity.client.BrowserTabActivity;
